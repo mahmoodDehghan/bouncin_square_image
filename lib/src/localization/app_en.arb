@@ -1,0 +1,6 @@
+{
+  "appTitle": "bouncing_square_image",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
