@@ -1,3 +1,4 @@
+import 'package:bouncing_square_image/src/bouncing_square/bloc/bouncing_square_bloc.dart';
 import 'package:bouncing_square_image/src/bouncing_square/bouncing_square.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,34 +40,47 @@ class GameAnimator extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> curve =
-        CurvedAnimation(parent: animationController, curve: Curves.bounceOut);
+        CurvedAnimation(parent: animationController, curve: Curves.linear);
     final topAnimation = useAnimation(topTween.animate(curve));
     final leftAnimation = useAnimation(leftTween.animate(curve));
-    if (leftAnimation == maxLeft ||
-        topAnimation == maxTop ||
-        leftAnimation == 0 ||
-        topAnimation == 0) {
+    if (leftAnimation >= maxLeft ||
+        topAnimation >= maxTop ||
+        leftAnimation <= 0 ||
+        topAnimation <= 0) {
       animationController.stop();
       animationController.reset();
-      context.read<BouncingSquareBloc>().add(BouncerSquareHit());
+      double breakPoint = (leftAnimation >= maxLeft || leftAnimation <= 0)
+          ? topAnimation
+          : leftAnimation;
+      HitWall wall = (leftAnimation >= maxLeft)
+          ? HitWall.right
+          : (topAnimation >= maxTop)
+              ? HitWall.down
+              : (leftAnimation <= 0)
+                  ? HitWall.left
+                  : HitWall.top;
+      context.read<BouncingSquareBloc>().add(BouncerSquareHit(
+            reachingWall: wall,
+            breakPoint: breakPoint,
+          ));
     }
     animationController.forward();
     return SizedBox.expand(
       child: GestureDetector(
-        onHorizontalDragUpdate: (details) => _onDragUpdate(
+        onPanUpdate: (details) => _onDragUpdate(
           context,
           details,
           leftAnimation,
           topAnimation,
           animationController,
         ),
-        onVerticalDragUpdate: (details) => _onDragUpdate(
-          context,
-          details,
-          leftAnimation,
-          topAnimation,
-          animationController,
-        ),
+        // onVerticalDragUpdate: (details) => _onDragUpdate(
+        //   context,
+        //   details,
+        //   leftAnimation,
+        //   topAnimation,
+        //   animationController,
+        // ),
         child: Stack(
           children: [
             Positioned(

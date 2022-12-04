@@ -43,14 +43,16 @@ class BouncingSquareState extends Equatable {
     double? positionLeftEnd,
     double? positionTopEnd,
     double? positionTopStart,
+    double? pageWidth,
+    double? pageHeight,
   }) {
     return BouncingSquareState(
       currentDirection: currentDirection ?? this.currentDirection,
       currentImage: currentImage ?? this.currentImage,
       // currentDistance: currentDistance ?? this.currentDistance,
       squareWidth: squareWidth,
-      pageWidth: pageWidth,
-      pageHeight: pageHeight,
+      pageWidth: pageWidth ?? this.pageWidth,
+      pageHeight: pageHeight ?? this.pageHeight,
       positionTopStart: positionTopStart ?? this.positionTopStart,
       positionTopEnd: positionTopEnd ?? this.positionTopEnd,
       positionLeftEnd: positionLeftEnd ?? this.positionLeftEnd,

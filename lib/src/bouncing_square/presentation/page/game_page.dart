@@ -18,7 +18,19 @@ class GamePage extends StatelessWidget {
                 pageWidth: pageSize.width,
                 squareSize: 150.0,
               ),
-          child: const GamePlot() //Text('This is GamePage'),
+          child: const GamePlot()
+          // LayoutBuilder(
+          //   builder: (BuildContext context, BoxConstraints constraints) {
+          //     context.read<BouncingSquareBloc>().add(
+          //           BouncerPlankResized(
+          //             newWidth: constraints.maxWidth,
+          //             newHeight: constraints.maxHeight,
+          //           ),
+          //         );
+          //     return const GamePlot();
+          //   },
+          // child: const GamePlot(),
+          // ),
           ),
     );
   }

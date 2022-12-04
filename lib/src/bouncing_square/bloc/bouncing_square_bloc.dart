@@ -27,6 +27,7 @@ class BouncingSquareBloc
     on<BouncerSquareClicked>(_onClicked);
     on<BouncerSquareSwipped>(_onSquareSwiped);
     on<BouncerSquareHit>(_onHitTheWall);
+    on<BouncerPlankResized>(_onResized);
   }
 
   void _onClicked(
@@ -38,53 +39,106 @@ class BouncingSquareBloc
 
   void _onSquareSwiped(
       BouncerSquareSwipped event, Emitter<BouncingSquareState> emit) {
-    final SwipeDirection direction;
-
-    if (event.deltaX.abs() >= event.deltaY.abs()) {
-      if (event.deltaX >= 0) {
-        direction = SwipeDirection.right;
+    // final SwipeDirection direction;
+    if (event.deltaX == 0) {
+      if (event.deltaY > 0) {
         emit(
           state.copyWith(
-            currentDirection: direction,
+            currentDirection: SwipeDirection.down,
+            positionTopEnd: state.maxTop,
+            positionTopStart: event.currentY,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: event.currentX,
+          ),
+        );
+      } else if (event.deltaY < 0) {
+        emit(
+          state.copyWith(
+            currentDirection: SwipeDirection.up,
+            positionTopEnd: 0,
+            positionTopStart: event.currentY,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: event.currentX,
+          ),
+        );
+      } else {
+        return;
+      }
+    } else if (event.deltaY == 0) {
+      if (event.deltaX > 0) {
+        emit(
+          state.copyWith(
+            currentDirection: SwipeDirection.right,
             positionTopEnd: event.currentY,
             positionTopStart: event.currentY,
             positionLeftStart: event.currentX,
             positionLeftEnd: state.maxLeft,
           ),
         );
-      } else {
-        direction = SwipeDirection.left;
+      } else if (event.deltaX < 0) {
         emit(
           state.copyWith(
-            currentDirection: direction,
-            positionLeftStart: event.currentX,
-            positionLeftEnd: 0,
+            currentDirection: SwipeDirection.left,
             positionTopEnd: event.currentY,
             positionTopStart: event.currentY,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: 0,
+          ),
+        );
+      } else {
+        return;
+      }
+    } else if (event.deltaY > 0) {
+      if (event.deltaX < 0) {
+        final endX = event.currentX -
+            ((event.deltaX.abs() * (state.maxTop - event.currentY)) /
+                event.deltaY);
+        emit(
+          state.copyWith(
+            currentDirection: SwipeDirection.downLeft,
+            positionTopEnd: state.maxTop,
+            positionTopStart: event.currentY,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: endX,
+          ),
+        );
+      } else {
+        final endX = ((event.deltaX.abs() * (state.maxTop - event.currentY)) /
+                event.deltaY) +
+            event.currentX;
+        emit(
+          state.copyWith(
+            currentDirection: SwipeDirection.downRight,
+            positionTopEnd: state.maxTop,
+            positionTopStart: event.currentY,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: endX,
           ),
         );
       }
-    } else {
-      if (event.deltaY >= 0) {
-        direction = SwipeDirection.down;
+    } else if (event.deltaY < 0) {
+      if (event.deltaX > 0) {
+        final endX =
+            event.currentX - ((event.deltaX * event.currentY) / event.deltaY);
         emit(
           state.copyWith(
-            currentDirection: direction,
-            positionLeftEnd: event.currentX,
-            positionLeftStart: event.currentX,
+            currentDirection: SwipeDirection.upRight,
+            positionTopEnd: 0,
             positionTopStart: event.currentY,
-            positionTopEnd: state.maxTop,
+            positionLeftStart: event.currentX,
+            positionLeftEnd: endX,
           ),
         );
       } else {
-        direction = SwipeDirection.up;
+        final endX = ((event.deltaX.abs() * event.currentY) / event.deltaY) +
+            event.currentX;
         emit(
           state.copyWith(
-            currentDirection: direction,
-            positionTopStart: event.currentY,
+            currentDirection: SwipeDirection.upLeft,
             positionTopEnd: 0,
-            positionLeftEnd: event.currentX,
+            positionTopStart: event.currentY,
             positionLeftStart: event.currentX,
+            positionLeftEnd: -endX,
           ),
         );
       }
@@ -93,9 +147,68 @@ class BouncingSquareBloc
 
   void _onHitTheWall(
       BouncerSquareHit event, Emitter<BouncingSquareState> emit) {
-    switch (state.currentDirection) {
-      case SwipeDirection.down:
+    switch (event.reachingWall) {
+      case HitWall.left:
         {
+          if (state.currentDirection == SwipeDirection.upLeft) {
+            emit(
+              state.copyWith(
+                currentDirection: SwipeDirection.upRight,
+                positionTopStart: event.breakPoint,
+                positionTopEnd: event.breakPoint +
+                    (state.positionTopEnd - state.positionTopStart),
+                positionLeftEnd: state.maxLeft,
+                positionLeftStart: 0,
+              ),
+            );
+          } else if (state.currentDirection == SwipeDirection.downLeft) {
+            emit(
+              state.copyWith(
+                currentDirection: SwipeDirection.downRight,
+                positionTopStart: event.breakPoint,
+                positionTopEnd: event.breakPoint +
+                    (state.positionTopEnd - state.positionTopStart),
+                positionLeftEnd: state.maxLeft,
+                positionLeftStart: 0,
+              ),
+            );
+          } else {
+            emit(
+              state.copyWith(
+                currentDirection: SwipeDirection.right,
+                positionLeftStart: 0,
+                positionLeftEnd: state.maxLeft,
+                positionTopEnd: state.positionTopEnd,
+                positionTopStart: state.positionTopEnd,
+              ),
+            );
+          }
+        }
+        break;
+      case HitWall.down:
+        if (state.currentDirection == SwipeDirection.downLeft) {
+          emit(
+            state.copyWith(
+              currentDirection: SwipeDirection.upLeft,
+              positionTopStart: state.maxTop,
+              positionTopEnd: 0,
+              positionLeftEnd: event.breakPoint +
+                  (state.positionLeftEnd - state.positionLeftStart),
+              positionLeftStart: event.breakPoint,
+            ),
+          );
+        } else if (state.currentDirection == SwipeDirection.downRight) {
+          emit(
+            state.copyWith(
+              currentDirection: SwipeDirection.upRight,
+              positionTopStart: state.maxTop,
+              positionTopEnd: 0,
+              positionLeftEnd: event.breakPoint +
+                  (state.positionLeftEnd - state.positionLeftStart),
+              positionLeftStart: event.breakPoint,
+            ),
+          );
+        } else {
           emit(
             state.copyWith(
               currentDirection: SwipeDirection.up,
@@ -107,21 +220,30 @@ class BouncingSquareBloc
           );
         }
         break;
-      case SwipeDirection.left:
-        {
+      case HitWall.right:
+        if (state.currentDirection == SwipeDirection.downRight) {
           emit(
             state.copyWith(
-              currentDirection: SwipeDirection.right,
-              positionLeftStart: 0,
-              positionLeftEnd: state.maxLeft,
-              positionTopEnd: state.positionTopEnd,
-              positionTopStart: state.positionTopEnd,
+              currentDirection: SwipeDirection.downLeft,
+              positionTopStart: event.breakPoint,
+              positionTopEnd: event.breakPoint +
+                  (state.positionTopEnd - state.positionTopStart),
+              positionLeftEnd: 0,
+              positionLeftStart: state.maxLeft,
             ),
           );
-        }
-        break;
-      case SwipeDirection.right:
-        {
+        } else if (state.currentDirection == SwipeDirection.upRight) {
+          emit(
+            state.copyWith(
+              currentDirection: SwipeDirection.upLeft,
+              positionTopStart: event.breakPoint,
+              positionTopEnd: event.breakPoint +
+                  (state.positionTopEnd - state.positionTopStart),
+              positionLeftEnd: 0,
+              positionLeftStart: state.maxLeft,
+            ),
+          );
+        } else {
           emit(
             state.copyWith(
               currentDirection: SwipeDirection.left,
@@ -133,8 +255,30 @@ class BouncingSquareBloc
           );
         }
         break;
-      case SwipeDirection.up:
-        {
+      case HitWall.top:
+        if (state.currentDirection == SwipeDirection.upLeft) {
+          emit(
+            state.copyWith(
+              currentDirection: SwipeDirection.downLeft,
+              positionTopStart: 0,
+              positionTopEnd: state.maxTop,
+              positionLeftEnd: event.breakPoint +
+                  (state.positionLeftEnd - state.positionLeftStart),
+              positionLeftStart: event.breakPoint,
+            ),
+          );
+        } else if (state.currentDirection == SwipeDirection.upRight) {
+          emit(
+            state.copyWith(
+              currentDirection: SwipeDirection.downRight,
+              positionTopStart: 0,
+              positionTopEnd: state.maxTop,
+              positionLeftEnd: event.breakPoint +
+                  (state.positionLeftEnd - state.positionLeftStart),
+              positionLeftStart: event.breakPoint,
+            ),
+          );
+        } else {
           emit(
             state.copyWith(
               currentDirection: SwipeDirection.down,
@@ -149,5 +293,13 @@ class BouncingSquareBloc
       default:
         break;
     }
+  }
+
+  void _onResized(
+      BouncerPlankResized event, Emitter<BouncingSquareState> emit) {
+    emit(state.copyWith(
+      pageHeight: event.newHeight,
+      pageWidth: event.newWidth,
+    ));
   }
 }

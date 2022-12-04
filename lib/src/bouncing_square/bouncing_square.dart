@@ -18,4 +18,5 @@ export './bloc/bouncing_square_bloc.dart'
         BouncingSquareState,
         BouncerSquareSwipped,
         BouncerSquareHit,
+        BouncerPlankResized,
         BouncerSquareClicked;

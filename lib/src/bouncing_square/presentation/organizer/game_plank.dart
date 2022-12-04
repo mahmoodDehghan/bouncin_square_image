@@ -1,3 +1,4 @@
+import 'package:bouncing_square_image/src/bouncing_square/bloc/bouncing_square_bloc.dart';
 import 'package:bouncing_square_image/src/bouncing_square/bouncing_square.dart';
 import 'package:bouncing_square_image/src/bouncing_square/presentation/organizer/game_animator.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ class GamePlot extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final animationController = useAnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 5),
     );
     return BlocBuilder<BouncingSquareBloc, BouncingSquareState>(
         builder: (context, state) {
