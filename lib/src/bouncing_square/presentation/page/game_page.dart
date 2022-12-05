@@ -13,25 +13,24 @@ class GamePage extends StatelessWidget {
     final pageSize = MediaQuery.of(context).size;
     return Scaffold(
       body: BlocProvider<BouncingSquareBloc>(
-          create: (context) => BouncingSquareBloc(
-                pageHeight: pageSize.height,
-                pageWidth: pageSize.width,
-                squareSize: 150.0,
-              ),
-          child: const GamePlot()
-          // LayoutBuilder(
-          //   builder: (BuildContext context, BoxConstraints constraints) {
-          //     context.read<BouncingSquareBloc>().add(
-          //           BouncerPlankResized(
-          //             newWidth: constraints.maxWidth,
-          //             newHeight: constraints.maxHeight,
-          //           ),
-          //         );
-          //     return const GamePlot();
-          //   },
-          // child: const GamePlot(),
-          // ),
-          ),
+        create: (context) => BouncingSquareBloc(
+          pageHeight: pageSize.height,
+          pageWidth: pageSize.width,
+          squareSize: 150.0,
+        ),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            context.read<BouncingSquareBloc>().add(
+                  BouncerPlankResized(
+                    newWidth: constraints.maxWidth,
+                    newHeight: constraints.maxHeight,
+                  ),
+                );
+            return const GamePlot();
+          },
+        ),
+      ),
+      // const GamePlot()),
     );
   }
 }

@@ -68,6 +68,8 @@ class BouncingSquareState extends Equatable {
         positionLeftStart,
         positionTopEnd,
         positionTopStart,
+        pageHeight,
+        pageWidth,
       ];
 
   @override

@@ -300,6 +300,11 @@ class BouncingSquareBloc
     emit(state.copyWith(
       pageHeight: event.newHeight,
       pageWidth: event.newWidth,
+      currentDirection: SwipeDirection.none,
+      positionLeftEnd: (event.newWidth / 2) - (state.squareWidth / 2),
+      positionLeftStart: (event.newWidth / 2) - (state.squareWidth / 2),
+      positionTopEnd: (event.newHeight / 2) - (state.squareWidth / 2),
+      positionTopStart: (event.newHeight / 2) - (state.squareWidth / 2),
     ));
   }
 }
