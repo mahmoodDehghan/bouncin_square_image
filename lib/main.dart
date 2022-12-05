@@ -12,7 +12,9 @@ int parsExp(String experession) {
   final normalNum = RegExp(r'\d+');
   final pluses = plusExp.allMatches(experession);
   final minuses = minusExp.allMatches(experession);
-  final first = int.tryParse(normalNum.firstMatch(experession)![0]!);
+  final first = experession[0] == '-'
+      ? 0
+      : int.tryParse(normalNum.firstMatch(experession)![0]!);
   final plusSum = pluses
       .map((e) => int.tryParse(e[0]!))
       .reduce((value, element) => value! + element!);
